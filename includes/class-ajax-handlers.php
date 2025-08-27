@@ -61,6 +61,10 @@ class ACFBIU_Ajax_Handlers {
                 'parent_key' => isset($field['parent_key']) ? $field['parent_key'] : '',
                 'parent_name' => isset($field['parent_name']) ? $field['parent_name'] : '',
                 'parent_hierarchy' => isset($field['parent_hierarchy']) ? $field['parent_hierarchy'] : array(),
+                'row_index' => isset($field['row_index']) ? $field['row_index'] : null,
+                'row_number' => isset($field['row_number']) ? $field['row_number'] : null,
+                'nested_row_index' => isset($field['nested_row_index']) ? $field['nested_row_index'] : null,
+                'nested_row_number' => isset($field['nested_row_number']) ? $field['nested_row_number'] : null,
                 'layout_name' => isset($field['layout_name']) ? $field['layout_name'] : '',
                 'has_value' => !empty($field['current_value'])
             );
@@ -98,9 +102,13 @@ class ACFBIU_Ajax_Handlers {
             wp_send_json_error(__('No image assignments provided', 'acf-bulk-image-uploader'));
         }
         
+        // Enable error reporting for debugging
+        $debug_mode = defined('WP_DEBUG') && WP_DEBUG;
+        
         // Process assignments
         $field_updates = array();
         $processed_count = 0;
+        $errors = array();
         
         foreach ($image_assignments as $assignment) {
             $field_key = sanitize_text_field($assignment['field_key']);
@@ -111,6 +119,7 @@ class ACFBIU_Ajax_Handlers {
             $valid_ids = ACFBIU_ACF_Helpers::validate_image_attachments($attachment_ids);
             
             if (empty($valid_ids)) {
+                $errors[] = 'Invalid attachment IDs for field: ' . $field_key;
                 continue;
             }
             
@@ -122,6 +131,10 @@ class ACFBIU_Ajax_Handlers {
                 'parent_key' => isset($assignment['parent_key']) ? $assignment['parent_key'] : '',
                 'parent_name' => isset($assignment['parent_name']) ? $assignment['parent_name'] : '',
                 'parent_hierarchy' => isset($assignment['parent_hierarchy']) ? $assignment['parent_hierarchy'] : array(),
+                'row_index' => isset($assignment['row_index']) ? intval($assignment['row_index']) : null,
+                'row_number' => isset($assignment['row_number']) ? intval($assignment['row_number']) : null,
+                'nested_row_index' => isset($assignment['nested_row_index']) ? intval($assignment['nested_row_index']) : null,
+                'nested_row_number' => isset($assignment['nested_row_number']) ? intval($assignment['nested_row_number']) : null,
                 'layout_name' => isset($assignment['layout_name']) ? $assignment['layout_name'] : ''
             );
             
@@ -129,7 +142,16 @@ class ACFBIU_Ajax_Handlers {
         }
         
         if (empty($field_updates)) {
-            wp_send_json_error(__('No valid images to upload', 'acf-bulk-image-uploader'));
+            $error_msg = __('No valid images to upload', 'acf-bulk-image-uploader');
+            if (!empty($errors)) {
+                $error_msg .= '. Errors: ' . implode(', ', $errors);
+            }
+            wp_send_json_error($error_msg);
+        }
+        
+        // Log debug info only if WP_DEBUG is enabled
+        if ($debug_mode) {
+            // Only log if explicitly in debug mode
         }
         
         // Update the fields
@@ -143,10 +165,15 @@ class ACFBIU_Ajax_Handlers {
                     count($field_updates)
                 ),
                 'processed' => $processed_count,
-                'fields_updated' => count($field_updates)
+                'fields_updated' => count($field_updates),
+                'debug' => $debug_mode ? array('field_updates' => $field_updates) : null
             ));
         } else {
-            wp_send_json_error(__('Some images could not be uploaded. Please check the page and try again.', 'acf-bulk-image-uploader'));
+            $error_msg = __('Some images could not be uploaded. Please check the page and try again.', 'acf-bulk-image-uploader');
+            if (!empty($errors)) {
+                $error_msg .= ' Errors: ' . implode(', ', $errors);
+            }
+            wp_send_json_error($error_msg);
         }
     }
     

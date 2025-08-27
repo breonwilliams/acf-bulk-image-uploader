@@ -1,0 +1,20 @@
+# Development files
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.swp
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Dependencies (if any in future)
+node_modules/
+vendor/
+
+# Build files (if any in future)
+/dist/
+/build/

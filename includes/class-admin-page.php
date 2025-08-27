@@ -40,7 +40,7 @@ class ACFBIU_Admin_Page {
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             
             <div class="acfbiu-container">
-                <form id="acfbiu-upload-form" method="post">
+                <form id="acfbiu-upload-form" method="post" onsubmit="return false;">
                     
                     <div class="acfbiu-section">
                         <h2><?php _e('Step 1: Select a Page', 'acf-bulk-image-uploader'); ?></h2>

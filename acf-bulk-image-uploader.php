@@ -15,9 +15,18 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('ACFBIU_VERSION', '1.0.0');
-define('ACFBIU_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('ACFBIU_PLUGIN_URL', plugin_dir_url(__FILE__));
+if (!defined('ACFBIU_VERSION')) {
+    define('ACFBIU_VERSION', '1.0.0');
+}
+if (!defined('ACFBIU_PLUGIN_DIR')) {
+    define('ACFBIU_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('ACFBIU_PLUGIN_URL')) {
+    define('ACFBIU_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+
+// Prevent duplicate class definition
+if (!class_exists('ACF_Bulk_Image_Uploader')) {
 
 /**
  * Main plugin class
@@ -98,12 +107,12 @@ class ACF_Bulk_Image_Uploader {
         // Enqueue media library
         wp_enqueue_media();
         
-        // Enqueue our custom scripts
+        // Enqueue our custom scripts with timestamp to force cache refresh
         wp_enqueue_script(
             'acfbiu-admin-js',
             ACFBIU_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery', 'wp-util'),
-            ACFBIU_VERSION,
+            ACFBIU_VERSION . '.' . time(),
             true
         );
         
@@ -143,3 +152,5 @@ class ACF_Bulk_Image_Uploader {
 
 // Initialize the plugin
 ACF_Bulk_Image_Uploader::get_instance();
+
+} // End class_exists check

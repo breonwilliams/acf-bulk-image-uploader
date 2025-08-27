@@ -13,9 +13,18 @@
         },
         
         bindEvents: function() {
+            // Prevent form submission
+            $('#acfbiu-upload-form').on('submit', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
             $('#acfbiu-page-select').on('change', this.onPageSelect.bind(this));
             $('#acfbiu-select-images').on('click', this.openMediaLibrary.bind(this));
-            $('#acfbiu-submit').on('click', this.submitImages.bind(this));
+            
+            // Use event delegation for submit button since it may be hidden initially
+            $(document).on('click', '#acfbiu-submit', this.submitImages.bind(this));
+            
             $(document).on('click', '.acfbiu-remove-image', this.removeImage.bind(this));
             $(document).on('change', '.acfbiu-field-checkbox', this.onFieldCheckboxChange.bind(this));
             $(document).on('click', '#acfbiu-select-all-fields', this.selectAllFields.bind(this));
@@ -26,6 +35,7 @@
         
         onPageSelect: function(e) {
             var pageId = $(e.target).val();
+            
             
             if (!pageId) {
                 $('#acfbiu-fields-section, #acfbiu-images-section, #acfbiu-submit-section').hide();
@@ -376,6 +386,7 @@
         
         submitImages: function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
             var pageId = $('#acfbiu-page-select').val();
             
@@ -418,10 +429,33 @@
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
                         parent_hierarchy: field.parent_hierarchy || [],
+                        row_index: field.row_index !== undefined ? field.row_index : null,
+                        row_number: field.row_number !== undefined ? field.row_number : null,
+                        nested_row_index: field.nested_row_index !== undefined ? field.nested_row_index : null,
+                        nested_row_number: field.nested_row_number !== undefined ? field.nested_row_number : null,
                         layout_name: field.layout_name || ''
                     });
+                } else if (field.type === 'repeater_row_image' || field.type === 'nested_repeater_row_image') {
+                    // Individual repeater row fields - one image per field
+                    if (imageIndex < this.selectedImages.length) {
+                        assignments.push({
+                            field_key: field.key,
+                            field_type: field.type,
+                            field_name: field.name,
+                            attachment_ids: [this.selectedImages[imageIndex].id],
+                            parent_key: field.parent_key || '',
+                            parent_name: field.parent_name || '',
+                            parent_hierarchy: field.parent_hierarchy || [],
+                            row_index: field.row_index !== undefined ? field.row_index : null,
+                            row_number: field.row_number !== undefined ? field.row_number : null,
+                            nested_row_index: field.nested_row_index !== undefined ? field.nested_row_index : null,
+                            nested_row_number: field.nested_row_number !== undefined ? field.nested_row_number : null,
+                            layout_name: field.layout_name || ''
+                        });
+                        imageIndex++;
+                    }
                 } else if (field.type === 'repeater_image' || field.type === 'nested_repeater_image') {
-                    // Repeater fields - create one row per image
+                    // Template repeater fields (for creating new rows) - use all remaining images
                     var repeaterImages = [];
                     while (imageIndex < this.selectedImages.length && repeaterImages.length < 10) { // Limit to 10 rows
                         repeaterImages.push(this.selectedImages[imageIndex].id);
@@ -436,6 +470,10 @@
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
                         parent_hierarchy: field.parent_hierarchy || [],
+                        row_index: field.row_index !== undefined ? field.row_index : null,
+                        row_number: field.row_number !== undefined ? field.row_number : null,
+                        nested_row_index: field.nested_row_index !== undefined ? field.nested_row_index : null,
+                        nested_row_number: field.nested_row_number !== undefined ? field.nested_row_number : null,
                         layout_name: field.layout_name || ''
                     });
                 } else {
@@ -448,6 +486,10 @@
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
                         parent_hierarchy: field.parent_hierarchy || [],
+                        row_index: field.row_index !== undefined ? field.row_index : null,
+                        row_number: field.row_number !== undefined ? field.row_number : null,
+                        nested_row_index: field.nested_row_index !== undefined ? field.nested_row_index : null,
+                        nested_row_number: field.nested_row_number !== undefined ? field.nested_row_number : null,
                         layout_name: field.layout_name || ''
                     });
                     imageIndex++;
@@ -479,11 +521,29 @@
                         $('#acfbiu-page-select').trigger('change');
                     } else {
                         ACFBIU.showMessage('error', response.data || acfbiu_ajax.messages.error);
+                        // Don't refresh on error - preserve the current state
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
                     $('#acfbiu-submit').prop('disabled', false);
-                    ACFBIU.showMessage('error', acfbiu_ajax.messages.error);
+                    
+                    // Try to parse error message from response
+                    var errorMsg = acfbiu_ajax.messages.error;
+                    try {
+                        if (xhr.responseText) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response && response.data) {
+                                errorMsg = response.data;
+                            }
+                        }
+                    } catch(e) {
+                        // If response is not JSON, show the raw error
+                        if (xhr.responseText && xhr.responseText.length < 200) {
+                            errorMsg = 'Server error: ' + xhr.responseText;
+                        }
+                    }
+                    
+                    ACFBIU.showMessage('error', errorMsg);
                 }
             });
         },
