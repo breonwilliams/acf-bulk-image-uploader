@@ -80,86 +80,114 @@ class ACFBIU_ACF_Helpers {
      *
      * @param array $field
      * @param string $parent_key
+     * @param string $label_prefix
+     * @param array $parent_hierarchy
      * @return array
      */
-    private static function extract_image_fields($field, $parent_key = '') {
+    private static function extract_image_fields($field, $parent_key = '', $label_prefix = '', $parent_hierarchy = array()) {
         $image_fields = array();
         
         // Handle single image field
         if ($field['type'] === 'image') {
+            $full_label = $label_prefix ? $label_prefix . ' → ' . $field['label'] : $field['label'];
             $image_fields[] = array(
                 'key' => $field['key'],
                 'name' => $field['name'],
-                'label' => $field['label'],
-                'type' => 'image',
+                'label' => $full_label,
+                'type' => count($parent_hierarchy) > 0 ? 'nested_repeater_image' : 'image',
                 'parent_key' => $parent_key,
-                'current_value' => $field['value']
+                'current_value' => isset($field['value']) ? $field['value'] : null,
+                'parent_hierarchy' => $parent_hierarchy
             );
         }
         
         // Handle gallery field
         elseif ($field['type'] === 'gallery') {
+            $full_label = $label_prefix ? $label_prefix . ' → ' . $field['label'] : $field['label'];
             $image_fields[] = array(
                 'key' => $field['key'],
                 'name' => $field['name'],
-                'label' => $field['label'],
+                'label' => $full_label,
                 'type' => 'gallery',
                 'parent_key' => $parent_key,
-                'current_value' => $field['value'],
-                'multiple' => true
+                'current_value' => isset($field['value']) ? $field['value'] : null,
+                'multiple' => true,
+                'parent_hierarchy' => $parent_hierarchy
             );
         }
         
-        // Handle repeater field
+        // Handle repeater field - RECURSIVE PROCESSING
         elseif ($field['type'] === 'repeater' && isset($field['sub_fields'])) {
+            $new_label_prefix = $label_prefix ? $label_prefix . ' → ' . $field['label'] : $field['label'];
+            $new_parent_hierarchy = $parent_hierarchy;
+            $new_parent_hierarchy[] = array(
+                'key' => $field['key'],
+                'name' => $field['name'],
+                'label' => $field['label'],
+                'type' => 'repeater'
+            );
+            
             foreach ($field['sub_fields'] as $sub_field) {
-                if ($sub_field['type'] === 'image') {
-                    $image_fields[] = array(
-                        'key' => $sub_field['key'],
-                        'name' => $sub_field['name'],
-                        'label' => $field['label'] . ' → ' . $sub_field['label'],
-                        'type' => 'repeater_image',
-                        'parent_key' => $field['key'],
-                        'parent_name' => $field['name'],
-                        'repeater_label' => $field['label'],
-                        'current_value' => null
-                    );
-                }
+                // Recursively extract fields from ALL sub_fields, not just images
+                $nested_fields = self::extract_image_fields(
+                    $sub_field, 
+                    $field['key'], 
+                    $new_label_prefix,
+                    $new_parent_hierarchy
+                );
+                $image_fields = array_merge($image_fields, $nested_fields);
             }
         }
         
-        // Handle flexible content field
+        // Handle flexible content field - RECURSIVE PROCESSING
         elseif ($field['type'] === 'flexible_content' && isset($field['layouts'])) {
             foreach ($field['layouts'] as $layout) {
                 if (isset($layout['sub_fields'])) {
+                    $new_label_prefix = $label_prefix ? $label_prefix . ' → ' . $field['label'] . ' → ' . $layout['label'] : $field['label'] . ' → ' . $layout['label'];
+                    $new_parent_hierarchy = $parent_hierarchy;
+                    $new_parent_hierarchy[] = array(
+                        'key' => $field['key'],
+                        'name' => $field['name'],
+                        'label' => $field['label'],
+                        'type' => 'flexible_content',
+                        'layout_name' => $layout['name'],
+                        'layout_label' => $layout['label']
+                    );
+                    
                     foreach ($layout['sub_fields'] as $sub_field) {
-                        if ($sub_field['type'] === 'image') {
-                            $image_fields[] = array(
-                                'key' => $sub_field['key'],
-                                'name' => $sub_field['name'],
-                                'label' => $field['label'] . ' → ' . $layout['label'] . ' → ' . $sub_field['label'],
-                                'type' => 'flexible_image',
-                                'parent_key' => $field['key'],
-                                'parent_name' => $field['name'],
-                                'layout_name' => $layout['name'],
-                                'layout_label' => $layout['label'],
-                                'current_value' => null
-                            );
-                        }
+                        // Recursively process all sub_fields
+                        $nested_fields = self::extract_image_fields(
+                            $sub_field,
+                            $field['key'],
+                            $new_label_prefix,
+                            $new_parent_hierarchy
+                        );
+                        $image_fields = array_merge($image_fields, $nested_fields);
                     }
                 }
             }
         }
         
-        // Handle group field
+        // Handle group field - RECURSIVE PROCESSING
         elseif ($field['type'] === 'group' && isset($field['sub_fields'])) {
+            $new_label_prefix = $label_prefix ? $label_prefix . ' → ' . $field['label'] : $field['label'];
+            $new_parent_hierarchy = $parent_hierarchy;
+            $new_parent_hierarchy[] = array(
+                'key' => $field['key'],
+                'name' => $field['name'],
+                'label' => $field['label'],
+                'type' => 'group'
+            );
+            
             foreach ($field['sub_fields'] as $sub_field) {
                 $parent_key_new = $parent_key ? $parent_key . '_' . $field['name'] : $field['name'];
-                $extracted = self::extract_image_fields($sub_field, $parent_key_new);
-                foreach ($extracted as &$extracted_field) {
-                    $extracted_field['label'] = $field['label'] . ' → ' . $extracted_field['label'];
-                }
-                $image_fields = array_merge($image_fields, $extracted);
+                $nested_fields = self::extract_image_fields(
+                    $sub_field,
+                    $parent_key_new,
+                    $new_label_prefix,
+                    $new_parent_hierarchy
+                );
+                $image_fields = array_merge($image_fields, $nested_fields);
             }
         }
         
@@ -196,21 +224,49 @@ class ACFBIU_ACF_Helpers {
                         break;
                         
                     case 'repeater_image':
-                        // Repeater field with image sub-fields
-                        $parent_name = $field_data['parent_name'];
-                        $sub_field_name = $field_data['field_name'];
-                        
-                        // Create repeater rows for each image
-                        $repeater_data = array();
-                        foreach ($attachment_ids as $attachment_id) {
-                            $repeater_data[] = array(
-                                $sub_field_name => $attachment_id
-                            );
-                        }
-                        
-                        // Update the repeater field
-                        if (!empty($repeater_data)) {
-                            update_field($field_data['parent_key'], $repeater_data, $post_id);
+                    case 'nested_repeater_image':
+                        // Handle nested repeater structures
+                        if (isset($field_data['parent_hierarchy']) && !empty($field_data['parent_hierarchy'])) {
+                            // For nested repeaters, we need to build the proper structure
+                            // This is a simplified approach - for complex nested structures,
+                            // you may need to handle existing data merging
+                            
+                            $repeater_data = array();
+                            foreach ($attachment_ids as $attachment_id) {
+                                // Create a row for each image
+                                $row_data = self::build_nested_repeater_row(
+                                    $field_data['parent_hierarchy'],
+                                    $field_data['field_name'],
+                                    $attachment_id,
+                                    0
+                                );
+                                if ($row_data) {
+                                    $repeater_data[] = $row_data;
+                                }
+                            }
+                            
+                            // Update the top-level repeater
+                            if (!empty($repeater_data) && !empty($field_data['parent_hierarchy'])) {
+                                $top_parent = $field_data['parent_hierarchy'][0];
+                                update_field($top_parent['key'], $repeater_data, $post_id);
+                            }
+                        } else {
+                            // Simple repeater (non-nested)
+                            $parent_name = $field_data['parent_name'];
+                            $sub_field_name = $field_data['field_name'];
+                            
+                            // Create repeater rows for each image
+                            $repeater_data = array();
+                            foreach ($attachment_ids as $attachment_id) {
+                                $repeater_data[] = array(
+                                    $sub_field_name => $attachment_id
+                                );
+                            }
+                            
+                            // Update the repeater field
+                            if (!empty($repeater_data)) {
+                                update_field($field_data['parent_key'], $repeater_data, $post_id);
+                            }
                         }
                         break;
                         
@@ -242,6 +298,39 @@ class ACFBIU_ACF_Helpers {
         }
         
         return $success;
+    }
+    
+    /**
+     * Build nested repeater row structure
+     *
+     * @param array $hierarchy The parent hierarchy
+     * @param string $field_name The image field name
+     * @param int $attachment_id The attachment ID
+     * @param int $level Current nesting level
+     * @return array
+     */
+    private static function build_nested_repeater_row($hierarchy, $field_name, $attachment_id, $level) {
+        if ($level >= count($hierarchy)) {
+            // We've reached the image field level
+            return array($field_name => $attachment_id);
+        }
+        
+        $current_parent = $hierarchy[$level];
+        
+        if ($current_parent['type'] === 'repeater') {
+            // For repeaters, we need to create a nested structure
+            if ($level === count($hierarchy) - 1) {
+                // This is the direct parent of the image field
+                return array($field_name => $attachment_id);
+            } else {
+                // This is a nested repeater, recurse deeper
+                $nested_data = self::build_nested_repeater_row($hierarchy, $field_name, $attachment_id, $level + 1);
+                return array($current_parent['name'] => array($nested_data));
+            }
+        }
+        
+        // For other types (group, flexible_content), handle accordingly
+        return array($field_name => $attachment_id);
     }
     
     /**

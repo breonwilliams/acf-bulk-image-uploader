@@ -417,9 +417,10 @@
                         attachment_ids: galleryImages,
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
+                        parent_hierarchy: field.parent_hierarchy || [],
                         layout_name: field.layout_name || ''
                     });
-                } else if (field.type === 'repeater_image') {
+                } else if (field.type === 'repeater_image' || field.type === 'nested_repeater_image') {
                     // Repeater fields - create one row per image
                     var repeaterImages = [];
                     while (imageIndex < this.selectedImages.length && repeaterImages.length < 10) { // Limit to 10 rows
@@ -434,6 +435,7 @@
                         attachment_ids: repeaterImages,
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
+                        parent_hierarchy: field.parent_hierarchy || [],
                         layout_name: field.layout_name || ''
                     });
                 } else {
@@ -445,6 +447,7 @@
                         attachment_ids: [this.selectedImages[imageIndex].id],
                         parent_key: field.parent_key || '',
                         parent_name: field.parent_name || '',
+                        parent_hierarchy: field.parent_hierarchy || [],
                         layout_name: field.layout_name || ''
                     });
                     imageIndex++;

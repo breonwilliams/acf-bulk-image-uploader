@@ -60,6 +60,7 @@ class ACFBIU_Ajax_Handlers {
                 'type' => $field['type'],
                 'parent_key' => isset($field['parent_key']) ? $field['parent_key'] : '',
                 'parent_name' => isset($field['parent_name']) ? $field['parent_name'] : '',
+                'parent_hierarchy' => isset($field['parent_hierarchy']) ? $field['parent_hierarchy'] : array(),
                 'layout_name' => isset($field['layout_name']) ? $field['layout_name'] : '',
                 'has_value' => !empty($field['current_value'])
             );
@@ -120,6 +121,7 @@ class ACFBIU_Ajax_Handlers {
                 'field_name' => isset($assignment['field_name']) ? $assignment['field_name'] : '',
                 'parent_key' => isset($assignment['parent_key']) ? $assignment['parent_key'] : '',
                 'parent_name' => isset($assignment['parent_name']) ? $assignment['parent_name'] : '',
+                'parent_hierarchy' => isset($assignment['parent_hierarchy']) ? $assignment['parent_hierarchy'] : array(),
                 'layout_name' => isset($assignment['layout_name']) ? $assignment['layout_name'] : ''
             );
             
