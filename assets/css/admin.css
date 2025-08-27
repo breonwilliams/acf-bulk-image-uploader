@@ -1,0 +1,444 @@
+/**
+ * ACF Bulk Image Uploader Admin Styles
+ */
+
+.acfbiu-container {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.acfbiu-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.acfbiu-section h2 {
+    margin-top: 0;
+    color: #23282d;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.acfbiu-section .description {
+    color: #646970;
+    font-style: italic;
+    margin: 10px 0;
+}
+
+.acfbiu-page-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+}
+
+/* Field Selection Controls */
+.acfbiu-field-selection-controls {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.acfbiu-field-selection-controls .button-small {
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+.acfbiu-selected-count {
+    margin-left: auto;
+    color: #50575e;
+    font-size: 14px;
+}
+
+.acfbiu-selected-count strong {
+    color: #2271b1;
+}
+
+/* Fields List */
+.acfbiu-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.acfbiu-field-item {
+    border: 2px solid #dcdcde;
+    border-radius: 4px;
+    padding: 15px;
+    padding-left: 45px;
+    position: relative;
+    background: #f6f7f7;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.acfbiu-field-item.selected {
+    border-color: #2271b1;
+    background: #fff;
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(34, 113, 177, 0.15);
+}
+
+.acfbiu-field-item:hover {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Field Checkbox */
+.field-checkbox-wrapper {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.acfbiu-field-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.acfbiu-field-checkbox + label {
+    cursor: pointer;
+}
+
+.field-number {
+    position: absolute;
+    top: -10px;
+    left: 45px;
+    background: #2271b1;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.acfbiu-field-item:not(.selected) .field-number {
+    background: #8c8f94;
+}
+
+.field-info {
+    margin-top: 10px;
+}
+
+.field-info strong {
+    color: #1d2327;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.field-meta {
+    font-size: 12px;
+    color: #646970;
+    display: block;
+    margin: 5px 0;
+}
+
+.field-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.field-status.has-value {
+    background: #edfaef;
+    color: #006505;
+    border: 1px solid #68de7c;
+}
+
+.field-status.no-value {
+    background: #f0f0f1;
+    color: #646970;
+    border: 1px solid #c3c4c7;
+}
+
+.field-status.will-replace {
+    background: #fff5e6;
+    color: #996800;
+    border: 1px solid #ffb900;
+    margin-left: 5px;
+}
+
+.field-status.will-skip {
+    background: #f0f0f1;
+    color: #646970;
+    border: 1px solid #c3c4c7;
+    margin-left: 5px;
+    text-decoration: line-through;
+}
+
+/* Selected Images */
+.acfbiu-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.acfbiu-image-item {
+    position: relative;
+    border: 2px solid #dcdcde;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f6f7f7;
+}
+
+.acfbiu-image-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #2271b1;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.acfbiu-remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #d63638;
+    color: #fff;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.acfbiu-remove-image:hover {
+    opacity: 1;
+}
+
+.image-title {
+    padding: 5px;
+    font-size: 11px;
+    color: #1d2327;
+    background: rgba(255, 255, 255, 0.9);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Messages */
+.acfbiu-message {
+    margin: 20px 0;
+}
+
+.acfbiu-message .notice {
+    margin: 0;
+}
+
+.no-fields-message {
+    padding: 20px;
+    background: #f6f7f7;
+    border: 1px dashed #c3c4c7;
+    color: #646970;
+    text-align: center;
+    border-radius: 4px;
+}
+
+/* Info Section */
+.acfbiu-info {
+    background: #f0f6fc;
+    border: 1px solid #c3d9e8;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.acfbiu-info h3 {
+    color: #0073aa;
+    margin-top: 0;
+    font-size: 1.1em;
+}
+
+.acfbiu-info ol,
+.acfbiu-info ul {
+    margin-left: 20px;
+    color: #50575e;
+}
+
+.acfbiu-info li {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+/* Button Styles */
+#acfbiu-select-images {
+    margin: 20px 0;
+    padding: 8px 20px;
+    font-size: 14px;
+}
+
+#acfbiu-submit {
+    margin-top: 20px;
+    min-width: 200px;
+    padding: 10px 30px;
+    font-size: 15px;
+}
+
+#acfbiu-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .acfbiu-fields-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .acfbiu-images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .acfbiu-page-select {
+        max-width: 100%;
+    }
+}
+
+/* Loading State */
+.acfbiu-loading {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.acfbiu-loading:after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-radius: 50%;
+    border-top-color: #2271b1;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Notices within selected images */
+#acfbiu-selected-images .notice {
+    margin-top: 15px;
+    padding: 10px;
+    border-left: 4px solid;
+}
+
+#acfbiu-selected-images .notice-warning {
+    background: #fcf9e8;
+    border-left-color: #dba617;
+    color: #996800;
+}
+
+#acfbiu-selected-images .notice-info {
+    background: #f0f6fc;
+    border-left-color: #72aee6;
+    color: #0073aa;
+}
+
+#acfbiu-selected-images .notice-success {
+    background: #edfaef;
+    border-left-color: #46b450;
+    color: #006505;
+}
+
+/* Disabled field appearance */
+.acfbiu-field-item:not(.selected) .field-info {
+    opacity: 0.6;
+}
+
+.acfbiu-field-item:not(.selected) .field-status {
+    filter: grayscale(1);
+}
+
+/* Replace Mode Toggle */
+.acfbiu-replace-mode-wrapper {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+}
+
+.acfbiu-replace-mode-wrapper label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.acfbiu-replace-mode-wrapper input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.acfbiu-replace-mode-wrapper .description {
+    margin-left: 5px;
+    color: #646970;
+    font-style: italic;
+}
+
+/* Page dropdown with stats */
+.acfbiu-page-select option {
+    padding: 5px;
+}
+
+.acfbiu-page-select option[data-empty="0"] {
+    background-color: #edfaef;
+}
+
+#acfbiu-refresh-stats {
+    vertical-align: middle;
+}
+
+/* Field checkbox disabled state */
+.acfbiu-field-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.acfbiu-field-checkbox:disabled + label {
+    cursor: not-allowed;
+}
